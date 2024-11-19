@@ -32,20 +32,6 @@ CREATE TABLE "student" (
       REFERENCES "contact_person"("id")
 );
 
-CREATE TABLE "lesson" (
-  "id" SERIAL,
-  "time_slot" INT NOT NULL,
-  "address_id" INT NOT NULL,
-  "pricing_id" INT NOT NULL,
-  "lesson_type" INT NOT NULL,
-  "skill_level" INT NOT NULL,
-  "target_genre" VARCHAR(50),
-  "min_participants" INT,
-  "max_participants" INT,
-  "instrument" VARCHAR(50),
-  PRIMARY KEY ("id")
-);
-
 CREATE TABLE "student_siblings" (
   "id" INT NOT NULL,
   "sibling_id" INT NOT NULL,
@@ -56,19 +42,6 @@ CREATE TABLE "student_siblings" (
   CONSTRAINT "FK_student_siblings.sibling_id"
     FOREIGN KEY ("sibling_id")
       REFERENCES "student"("id")
-);
-
-CREATE TABLE "booking" (
-  "id" SERIAL,
-  "lesson_id" INT NOT NULL,
-  "student_id" INT NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_booking.student_id"
-    FOREIGN KEY ("student_id")
-      REFERENCES "student"("id"),
-  CONSTRAINT "FK_booking.lesson_id"
-    FOREIGN KEY ("lesson_id")
-      REFERENCES "lesson"("id")
 );
 
 CREATE TABLE "instrument_for_renting" (
@@ -142,25 +115,15 @@ CREATE TABLE "instructor_instruments" (
       REFERENCES "instructor"("id")
 );
 
-CREATE TABLE "available_timeslots" (
+CREATE TABLE "available_timeslot" (
   "id" SERIAL,
   "instructor_id" INT NOT NULL,
   "start_time" TIMESTAMP NOT NULL,
   "end_time" TIMESTAMP NOT NULL,
   PRIMARY KEY ("id"),
-  CONSTRAINT "FK_available_timeslots.instructor_id"
+  CONSTRAINT "FK_available_timeslot.instructor_id"
     FOREIGN KEY ("instructor_id")
       REFERENCES "instructor"("id")
-);
-
-CREATE TABLE "student_skill" (
-  "id" SERIAL,
-  "instrument" VARCHAR(50),
-  "skill_level" INT NOT NULL,
-  PRIMARY KEY ("id", "instrument"),
-  CONSTRAINT "FK_student_skill.id"
-    FOREIGN KEY ("id")
-      REFERENCES "student"("id")
 );
 
 CREATE TABLE "skill" (
@@ -169,3 +132,68 @@ CREATE TABLE "skill" (
   PRIMARY KEY ("id")
 );
 
+CREATE TABLE "student_skill" (
+  "student_id" INT,
+  "instrument" VARCHAR(50),
+  "skill_level" INT NOT NULL,
+  PRIMARY KEY ("student_id", "instrument"),
+  CONSTRAINT "FK_student_skill.student_id"
+    FOREIGN KEY ("student_id")
+      REFERENCES "student"("id"),
+  CONSTRAINT "FK_student_skill.skill_level"
+    FOREIGN KEY ("skill_level")
+      REFERENCES "skill"("id")
+);
+
+CREATE TABLE "lesson" (
+  "id" SERIAL,
+  "time_slot" INT NOT NULL,
+  "address_id" INT NOT NULL,
+  "pricing_id" INT NOT NULL,
+  "lesson_type" INT NOT NULL,
+  "skill_level" INT NOT NULL,
+  "target_genre" VARCHAR(50),
+  "min_participants" INT,
+  "max_participants" INT,
+  "instrument" VARCHAR(50),
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_lesson.time_slot"
+    FOREIGN KEY ("time_slot")
+      REFERENCES "available_timeslot"("id"),
+  CONSTRAINT "FK_lesson.address_id"
+    FOREIGN KEY ("address_id")
+      REFERENCES "address"("id"),
+  CONSTRAINT "FK_lesson.pricing_id"
+    FOREIGN KEY ("pricing_id")
+      REFERENCES "pricing_scheme"("id"),
+  CONSTRAINT "FK_lesson.skill_level"
+    FOREIGN KEY ("skill_level")
+      REFERENCES "skill"("id"),
+  CONSTRAINT "FK_lesson.lesson_type"
+    FOREIGN KEY ("lesson_type")
+      REFERENCES "lesson_type"("id")
+);
+
+CREATE TABLE "booking" (
+  "id" SERIAL,
+  "lesson_id" INT NOT NULL,
+  "student_id" INT NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_booking.student_id"
+    FOREIGN KEY ("student_id")
+      REFERENCES "student"("id"),
+  CONSTRAINT "FK_booking.lesson_id"
+    FOREIGN KEY ("lesson_id")
+      REFERENCES "lesson"("id")
+);
+
+CREATE TABLE "attended_lesson" (
+  "id" SERIAL,
+  "student_id" INT NOT NULL,
+  "time" TIMESTAMP NOT NULL,
+  "cost" NUMERIC(10,2) NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_attended_lesson.student_id"
+    FOREIGN KEY ("student_id")
+      REFERENCES "student"("id")
+);
