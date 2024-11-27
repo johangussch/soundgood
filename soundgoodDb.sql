@@ -104,18 +104,6 @@ CREATE TABLE "instructor" (
       REFERENCES "address"("id") ON DELETE SET NULL
 );
 
--- Create the "given_lesson" table with ON DELETE CASCADE
-CREATE TABLE "given_lesson" (
-  "id" SERIAL,
-  "instructor_id" INT NOT NULL,
-  "time" TIMESTAMP NOT NULL,
-  "pay" FLOAT NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_given_lesson.instructor_id"
-    FOREIGN KEY ("instructor_id")
-      REFERENCES "instructor"("id") ON DELETE CASCADE
-);
-
 -- Create the "instructor_instruments" table with ON DELETE CASCADE
 CREATE TABLE "instructor_instruments" (
   "instructor_id" INT,
@@ -187,6 +175,18 @@ CREATE TABLE "lesson" (
   CONSTRAINT "FK_lesson.lesson_type"
     FOREIGN KEY ("lesson_type")
       REFERENCES "lesson_type"("id") ON DELETE CASCADE
+);
+
+-- Create the "given_lesson" table with ON DELETE CASCADE
+CREATE TABLE "given_lesson" (
+  "id" SERIAL,
+  "lesson_id" INT NOT NULL,
+  "time" TIMESTAMP NOT NULL,
+  "pay" FLOAT NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_given_lesson.lesson_id"
+    FOREIGN KEY ("lesson_id")
+      REFERENCES "lesson"("id") ON DELETE CASCADE
 );
 
 -- Create the "booking" table with ON DELETE CASCADE
