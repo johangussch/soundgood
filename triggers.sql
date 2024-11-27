@@ -3,6 +3,7 @@
 -- 2. no instrument can exist in two seperate rentals
 -- 3. make min/max participant 1 if it is an individual lesson
 -- 4. always create the inverse of a sibling relation
+-- 5. ensure rental time is maximum 12 months
 
 CREATE OR REPLACE FUNCTION enforce_rental_limit()
 RETURNS TRIGGER AS $$
@@ -84,6 +85,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+--------------------
+
 CREATE TRIGGER insert_inverse_sibling_trigger
 AFTER INSERT ON "student_siblings"
 FOR EACH ROW EXECUTE FUNCTION insert_inverse_sibling();
+
+CREATE OR REPLACE FUNCTION ensure_rental_period()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- Check if the rental period exceeds 12 months
+  IF NEW.end_date > NEW.start_date + INTERVAL '12 months' THEN
+    RAISE EXCEPTION 'Rental period cannot exceed 12 months. Start Date: %, End Date: %', NEW.start_date, NEW.end_date;
+  END IF;
+
+  RETURN NEW; -- Allow the insert/update if the condition is met
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_rental_period
+BEFORE INSERT OR UPDATE ON "rental"
+FOR EACH ROW
+EXECUTE FUNCTION ensure_rental_period();
