@@ -49,7 +49,7 @@ INSERT INTO "instructor" ("address_id", "name", "personal_number", "email", "pho
 INSERT INTO "lesson_type" ("lesson_type") VALUES
 ('Individual'),
 ('Group'),
-('Ensemble'),
+('Ensemble');
 
 -- Insert data into the "pricing_scheme" table
 INSERT INTO "pricing_scheme" ("cost_per_student", "pay_for_instructor", "discount") VALUES
