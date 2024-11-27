@@ -1,326 +1,107 @@
--- Create the "address" table
-CREATE TABLE "address" (
-  "id" SERIAL,
-  "street" VARCHAR(50),
-  "city" VARCHAR(50),
-  "zip_code" VARCHAR(50),
-  PRIMARY KEY ("id")
-);
+-- Inserting addresses
+INSERT INTO "address" ("street", "city", "zip_code") VALUES
+('123 Elm St', 'Springfield', '12345'),
+('456 Oak St', 'Shelbyville', '67890'),
+('789 Pine St', 'Capital City', '54321'),
+('101 Maple St', 'Greenwich', '11223'),
+('202 Birch St', 'Woodstock', '33445');
 
--- Create the "contact_person" table with ON DELETE SET NULL
-CREATE TABLE "contact_person" (
-  "id" SERIAL,
-  "address_id" INT,
-  "phone_number" VARCHAR(50),
-  "email" VARCHAR(50),
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_contact_person.address_id"
-    FOREIGN KEY ("address_id")
-      REFERENCES "address"("id") ON DELETE SET NULL
-);
+-- Inserting contact persons
+INSERT INTO "contact_person" ("address_id", "phone_number", "email") VALUES
+(1, '555-1234', 'john.doe@example.com'),
+(2, '555-2345', 'jane.doe@example.com'),
+(3, '555-3456', 'alice.smith@example.com'),
+(4, '555-4567', 'bob.jones@example.com'),
+(5, '555-5678', 'charlie.brown@example.com');
 
--- Create the "student" table with ON DELETE CASCADE/SET NULL
-CREATE TABLE "student" (
-  "id" SERIAL,
-  "address_id" INT,
-  "contact_id" INT NOT NULL,
-  "name" VARCHAR(50) NOT NULL,
-  "personal_number" CHAR(10) UNIQUE,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_student.address_id"
-    FOREIGN KEY ("address_id")
-      REFERENCES "address"("id") ON DELETE SET NULL,
-  CONSTRAINT "FK_student.contact_id"
-    FOREIGN KEY ("contact_id")
-      REFERENCES "contact_person"("id") ON DELETE SET NULL
-);
+-- Inserting students
+INSERT INTO "student" ("address_id", "contact_id", "name", "personal_number") VALUES
+(1, 1, 'John Doe', '1234567890'),
+(2, 2, 'Jane Doe', '2345678901'),
+(3, 3, 'Alice Smith', '3456789012'),
+(4, 4, 'Bob Jones', '4567890123'),
+(5, 5, 'Charlie Brown', '5678901234');
 
--- Create the "student_siblings" table with ON DELETE CASCADE
-CREATE TABLE "student_siblings" (
-  "id" INT NOT NULL,
-  "sibling_id" INT NOT NULL,
-  PRIMARY KEY ("id", "sibling_id"),
-  CONSTRAINT "FK_student_siblings.id"
-    FOREIGN KEY ("id")
-      REFERENCES "student"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_student_siblings.sibling_id"
-    FOREIGN KEY ("sibling_id")
-      REFERENCES "student"("id") ON DELETE CASCADE
-);
+-- Inserting instruments for renting
+INSERT INTO "instrument_for_renting" ("name", "rent_cost", "brand") VALUES
+('Guitar', 30, 'Fender'),
+('Piano', 50, 'Yamaha'),
+('Violin', 25, 'Stradivarius'),
+('Drum Kit', 40, 'Pearl'),
+('Saxophone', 35, 'Selmer');
 
--- Create the "instrument_for_renting" table
-CREATE TABLE "instrument_for_renting" (
-  "id" SERIAL,
-  "name" VARCHAR(50) NOT NULL,
-  "rent_cost" INT NOT NULL,
-  "brand" VARCHAR(50),
-  PRIMARY KEY ("id")
-);
+-- Inserting pricing schemes
+INSERT INTO "pricing_scheme" ("cost_per_student", "pay_for_instructor", "discount") VALUES
+(100, 50, 10),
+(120, 60, 15),
+(80, 40, 5),
+(150, 80, 20),
+(90, 45, 0);
 
--- Create the "rental" table with ON DELETE CASCADE
-CREATE TABLE "rental" (
-  "id" SERIAL,
-  "student_id" INT NOT NULL,
-  "instrument_id" INT NOT NULL,
-  "start_date" TIMESTAMP NOT NULL,
-  "end_date" TIMESTAMP NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_rental.instrument_id"
-    FOREIGN KEY ("instrument_id")
-      REFERENCES "instrument_for_renting"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_rental.student_id"
-    FOREIGN KEY ("student_id")
-      REFERENCES "student"("id") ON DELETE CASCADE
-);
+-- Inserting lesson types
+INSERT INTO "lesson_type" ("lesson_type") VALUES
+('Individual'),
+('Group'),
+('Ensemble');
 
--- Create the "pricing_scheme" table
-CREATE TABLE "pricing_scheme" (
-  "id" SERIAL,
-  "cost_per_student" INT NOT NULL,
-  "pay_for_instructor" INT NOT NULL,
-  "discount" INT NOT NULL,
-  PRIMARY KEY ("id")
-);
+-- Inserting instructors
+INSERT INTO "instructor" ("address_id", "name", "personal_number", "email", "phone_number", "teaches_ensamble") VALUES
+(1, 'David Clark', '0012345678', 'david.clark@example.com', '555-8765', TRUE),
+(2, 'Eva Turner', '0023456789', 'eva.turner@example.com', '555-9876', FALSE),
+(3, 'Fred Williams', '0034567890', 'fred.williams@example.com', '555-2345', TRUE),
+(4, 'Helen White', '0045678901', 'helen.white@example.com', '555-3456', FALSE),
+(5, 'Igor Petrov', '0056789012', 'igor.petrov@example.com', '555-4567', TRUE);
 
--- Create the "lesson_type" table
-CREATE TABLE "lesson_type" (
-  "id" SERIAL,
-  "lesson_type" VARCHAR(50) NOT NULL,
-  PRIMARY KEY ("id")
-);
+-- Inserting instruments that instructors can teach
+INSERT INTO "instructor_instruments" ("instructor_id", "instrument") VALUES
+(1, 'Guitar'),
+(2, 'Piano'),
+(3, 'Violin'),
+(4, 'Drum Kit'),
+(5, 'Saxophone');
 
--- Create the "instructor" table with ON DELETE SET NULL
-CREATE TABLE "instructor" (
-  "id" SERIAL,
-  "address_id" INT NOT NULL,
-  "name" VARCHAR(50) NOT NULL,
-  "personal_number" CHAR(10) UNIQUE,
-  "email" VARCHAR(50),
-  "phone_number" VARCHAR(50),
-  "teaches_ensamble" BOOL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_instructor.address_id"
-    FOREIGN KEY ("address_id")
-      REFERENCES "address"("id") ON DELETE SET NULL
-);
+-- Inserting available timeslots
+INSERT INTO "available_timeslot" ("instructor_id", "start_time", "end_time") VALUES
+(1, '2024-12-01 09:00:00', '2024-12-01 11:00:00'),
+(2, '2024-12-01 10:00:00', '2024-12-01 12:00:00'),
+(3, '2024-12-02 13:00:00', '2024-12-02 15:00:00'),
+(4, '2024-12-03 14:00:00', '2024-12-03 16:00:00'),
+(5, '2024-12-04 15:00:00', '2024-12-04 17:00:00');
 
--- Create the "instructor_instruments" table with ON DELETE CASCADE
-CREATE TABLE "instructor_instruments" (
-  "instructor_id" INT,
-  "instrument" VARCHAR(50),
-  PRIMARY KEY ("instructor_id", "instrument"),
-  CONSTRAINT "FK_instructor_instruments.instructor_id"
-    FOREIGN KEY ("instructor_id")
-      REFERENCES "instructor"("id") ON DELETE CASCADE
-);
+-- Inserting skills
+INSERT INTO "skill" ("skill_name") VALUES
+('Beginner'),
+('Intermediate'),
+('Advanced');
 
--- Create the "available_timeslot" table with ON DELETE CASCADE
-CREATE TABLE "available_timeslot" (
-  "id" SERIAL,
-  "instructor_id" INT NOT NULL,
-  "start_time" TIMESTAMP NOT NULL,
-  "end_time" TIMESTAMP NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_available_timeslot.instructor_id"
-    FOREIGN KEY ("instructor_id")
-      REFERENCES "instructor"("id") ON DELETE CASCADE
-);
+-- Inserting student skills
+INSERT INTO "student_skill" ("student_id", "instrument", "skill_level") VALUES
+(1, 'Guitar', 1),
+(2, 'Piano', 2),
+(3, 'Violin', 3),
+(4, 'Drum Kit', 2),
+(5, 'Saxophone', 1);
 
--- Create the "skill" table
-CREATE TABLE "skill" (
-  "id" SERIAL,
-  "skill_name" VARCHAR(50) NOT NULL,
-  PRIMARY KEY ("id")
-);
+-- Inserting lessons
+INSERT INTO "lesson" ("time_slot", "address_id", "pricing_id", "lesson_type", "skill_level", "target_genre", "min_participants", "max_participants", "instrument") VALUES
+(1, 1, 1, 1, 1, NULL, 1, 5, 'Guitar'),
+(2, 2, 2, 2, 2, NULL, 1, 2, 'Piano'),
+(3, 3, 3, 3, 3, 'Jazz', 1, 5, 'Violin'),  -- Genre only for Ensemble lessons
+(4, 4, 4, 2, 2, NULL, 1, 10, 'Drum Kit'),
+(5, 5, 5, 1, 1, NULL, 1, 3, 'Saxophone');
 
--- Create the "student_skill" table with ON DELETE CASCADE
-CREATE TABLE "student_skill" (
-  "student_id" INT,
-  "instrument" VARCHAR(50),
-  "skill_level" INT NOT NULL,
-  PRIMARY KEY ("student_id", "instrument"),
-  CONSTRAINT "FK_student_skill.student_id"
-    FOREIGN KEY ("student_id")
-      REFERENCES "student"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_student_skill.skill_level"
-    FOREIGN KEY ("skill_level")
-      REFERENCES "skill"("id") ON DELETE CASCADE
-);
+-- Inserting bookings
+INSERT INTO "booking" ("lesson_id", "student_id") VALUES
+(1, 1),
+(2, 2),
+(3, 3),
+(4, 4),
+(5, 5);
 
--- Create the "lesson" table with ON DELETE CASCADE
-CREATE TABLE "lesson" (
-  "id" SERIAL,
-  "time_slot" INT NOT NULL,
-  "address_id" INT NOT NULL,
-  "pricing_id" INT NOT NULL,
-  "lesson_type" INT NOT NULL,
-  "skill_level" INT NOT NULL,
-  "target_genre" VARCHAR(50),
-  "min_participants" INT,
-  "max_participants" INT,
-  "instrument" VARCHAR(50),
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_lesson.time_slot"
-    FOREIGN KEY ("time_slot")
-      REFERENCES "available_timeslot"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_lesson.address_id"
-    FOREIGN KEY ("address_id")
-      REFERENCES "address"("id") ON DELETE SET NULL,
-  CONSTRAINT "FK_lesson.pricing_id"
-    FOREIGN KEY ("pricing_id")
-      REFERENCES "pricing_scheme"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_lesson.skill_level"
-    FOREIGN KEY ("skill_level")
-      REFERENCES "skill"("id") ON DELETE SET NULL,
-  CONSTRAINT "FK_lesson.lesson_type"
-    FOREIGN KEY ("lesson_type")
-      REFERENCES "lesson_type"("id") ON DELETE CASCADE
-);
-
--- Create the "given_lesson" table with ON DELETE CASCADE
-CREATE TABLE "given_lesson" (
-  "id" SERIAL,
-  "lesson_id" INT NOT NULL,
-  "time" TIMESTAMP NOT NULL,
-  "pay" FLOAT NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_given_lesson.lesson_id"
-    FOREIGN KEY ("lesson_id")
-      REFERENCES "lesson"("id") ON DELETE CASCADE
-);
-
--- Create the "booking" table with ON DELETE CASCADE
-CREATE TABLE "booking" (
-  "id" SERIAL,
-  "lesson_id" INT NOT NULL,
-  "student_id" INT NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_booking.student_id"
-    FOREIGN KEY ("student_id")
-      REFERENCES "student"("id") ON DELETE CASCADE,
-  CONSTRAINT "FK_booking.lesson_id"
-    FOREIGN KEY ("lesson_id")
-      REFERENCES "lesson"("id") ON DELETE CASCADE
-);
-
--- Create the "attended_lesson" table with ON DELETE CASCADE
-CREATE TABLE "attended_lesson" (
-  "id" SERIAL,
-  "student_id" INT NOT NULL,
-  "time" TIMESTAMP NOT NULL,
-  "cost" NUMERIC(10,2) NOT NULL,
-  PRIMARY KEY ("id"),
-  CONSTRAINT "FK_attended_lesson.student_id"
-    FOREIGN KEY ("student_id")
-      REFERENCES "student"("id") ON DELETE CASCADE
-);
-
------ TRIGGERS ------
--- 1. rental limit is 2 instruments
--- 2. no instrument can exist in two seperate rentals
--- 3. make min/max participant 1 if it is an individual lesson
--- 4. always create the inverse of a sibling relation
--- 5. ensure rental time is maximum 12 months
-
-CREATE OR REPLACE FUNCTION enforce_rental_limit()
-RETURNS TRIGGER AS $$
-BEGIN
-  IF (SELECT COUNT(*) 
-      FROM "rental" 
-      WHERE "student_id" = NEW."student_id" 
-      AND "end_date" > CURRENT_DATE) >= 2 THEN
-    RAISE EXCEPTION 'A student can only rent up to 2 instruments at a time';
-  END IF;
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER rental_limit_trigger
-BEFORE INSERT OR UPDATE ON "rental"
-FOR EACH ROW EXECUTE FUNCTION enforce_rental_limit();
-
----------------------
-
-CREATE OR REPLACE FUNCTION enforce_unique_instrument_rental()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Check if the instrument is already rented during the same period
-  IF EXISTS (
-    SELECT 1
-    FROM "rental"
-    WHERE "instrument_id" = NEW."instrument_id"
-      AND (NEW."start_date", NEW."end_date") OVERLAPS ("start_date", "end_date")
-  ) THEN
-    RAISE EXCEPTION 'The instrument is already rented for this period';
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER unique_instrument_rental_trigger
-BEFORE INSERT OR UPDATE ON "rental"
-FOR EACH ROW EXECUTE FUNCTION enforce_unique_instrument_rental();
-
------------------
-
-CREATE OR REPLACE FUNCTION enforce_individual_lesson_participants()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Check if the lesson is an individual lesson
-  IF (SELECT "lesson_type" FROM "lesson_type" WHERE "id" = NEW."lesson_type") = 'Individual' THEN
-    -- Set min and max participants to 1
-    NEW."min_participants" := 1;
-    NEW."max_participants" := 1;
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER enforce_min_max_individual
-BEFORE INSERT OR UPDATE ON "lesson"
-FOR EACH ROW EXECUTE FUNCTION enforce_individual_lesson_participants();
-
-------------------
-
-CREATE OR REPLACE FUNCTION insert_inverse_sibling()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Check if the inverse relationship already exists
-  IF NOT EXISTS (
-    SELECT 1
-    FROM "student_siblings"
-    WHERE "id" = NEW."sibling_id" AND "sibling_id" = NEW."id"
-  ) THEN
-    -- Insert the inverse relationship
-    INSERT INTO "student_siblings" ("id", "sibling_id")
-    VALUES (NEW."sibling_id", NEW."id");
-  END IF;
-
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
---------------------
-
-CREATE TRIGGER insert_inverse_sibling_trigger
-AFTER INSERT ON "student_siblings"
-FOR EACH ROW EXECUTE FUNCTION insert_inverse_sibling();
-
-CREATE OR REPLACE FUNCTION ensure_rental_period()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- Check if the rental period exceeds 12 months
-  IF NEW.end_date > NEW.start_date + INTERVAL '12 months' THEN
-    RAISE EXCEPTION 'Rental period cannot exceed 12 months. Start Date: %, End Date: %', NEW.start_date, NEW.end_date;
-  END IF;
-
-  RETURN NEW; -- Allow the insert/update if the condition is met
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER check_rental_period
-BEFORE INSERT OR UPDATE ON "rental"
-FOR EACH ROW
-EXECUTE FUNCTION ensure_rental_period();
+-- Inserting attended lessons
+INSERT INTO "attended_lesson" ("student_id", "time", "cost") VALUES
+(1, '2024-12-01 09:00:00', 90),
+(2, '2024-12-01 10:00:00', 100),
+(3, '2024-12-02 13:00:00', 110),
+(4, '2024-12-03 14:00:00', 120),
+(5, '2024-12-04 15:00:00', 95);
