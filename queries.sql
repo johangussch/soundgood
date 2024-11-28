@@ -12,6 +12,15 @@ GROUP BY TO_CHAR(given_lesson.time, 'YYYY-MM')
 ORDER BY month;
 
 -- 2. Show how many students there are with no sibling, with one sibling, with two siblings
+SELECT num_of_siblings, COUNT(*) 
+FROM (
+	SELECT student.id, COUNT(student_siblings.id) AS num_of_siblings
+	FROM student
+	LEFT JOIN student_siblings ON student.id = student_siblings.id
+	GROUP BY student.id
+)
+GROUP BY num_of_siblings
+ORDER BY num_of_siblings
 
 -- 3. List ids and names of all instructors who has given more than a specific number of lessons during the current month
 
