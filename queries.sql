@@ -23,12 +23,12 @@ GROUP BY num_of_siblings
 ORDER BY num_of_siblings
 
 -- 3. List ids and names of all instructors who has given more than a specific number of lessons during the current month
-Select name, COUNT(*) 
+Select instructor.id ,name, COUNT(*) 
 FROM instructor 
 JOIN available_timeslot ON instructor.id = available_timeslot.instructor_id
 JOIN lesson ON lesson.time_slot = available_timeslot.id
 JOIN given_lesson ON given_lesson.lesson_id = lesson.id
-GROUP BY name HAVING COUNT(*) > 1
+GROUP BY instructor.id, name HAVING COUNT(*) > 1
 ORDER BY count DESC
 
 -- 4. List all ensembles held during the next week
