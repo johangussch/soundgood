@@ -25,9 +25,14 @@ ORDER BY num_of_siblings
 -- 3. List ids and names of all instructors who has given more than a specific number of lessons during the current month
 Select instructor.id ,name, COUNT(*) 
 FROM instructor 
-JOIN available_timeslot ON instructor.id = available_timeslot.instructor_id
-JOIN lesson ON lesson.time_slot = available_timeslot.id
-JOIN given_lesson ON given_lesson.lesson_id = lesson.id
+JOIN available_timeslot 
+	ON instructor.id = available_timeslot.instructor_id
+JOIN lesson 
+	ON lesson.time_slot = available_timeslot.id
+JOIN given_lesson 
+	ON given_lesson.lesson_id = lesson.id
+WHERE DATE_PART('month', available_timeslot.start_time) = DATE_PART('month', CURRENT_DATE)
+  AND DATE_PART('year', available_timeslot.start_time) = DATE_PART('year', CURRENT_DATE)
 GROUP BY instructor.id, name HAVING COUNT(*) > 1
 ORDER BY count DESC
 
