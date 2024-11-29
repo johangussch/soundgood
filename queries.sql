@@ -32,3 +32,19 @@ GROUP BY name HAVING COUNT(*) > 1
 ORDER BY count DESC
 
 -- 4. List all ensembles held during the next week
+SELECT
+TO_CHAR(ats.start_time ,'day') as day_of_week,
+l.target_genre as Genre,
+CASE
+    WHEN COUNT(b.id) >= l.max_participants THEN 'fully booked'
+    WHEN l.max_participants - COUNT(b.id) <= 2 THEN '1-2 seats left'
+    ELSE 'more seats left'
+  END AS booking_status
+FROM lesson l
+JOIN available_timeslot ats ON l.time_slot = ats.id
+LEFT JOIN booking b ON l.id = b.lesson_id
+WHERE l.lesson_type = '3'
+AND ats.start_time BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
+
+GROUP BY l.target_genre, l.max_participants, ats.start_time
+ORDER BY ats.start_time
