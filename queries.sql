@@ -1,4 +1,8 @@
--- 1. find all lessons given for each month
+-- EXPLAIN ANALYZE for query 1:
+EXPLAIN ANALYZE monthly_lesson_summary
+
+-- View for Query 1: Find all lessons given for each month
+CREATE OR REPLACE VIEW monthly_lessons_summary AS
 SELECT 
   TO_CHAR(given_lesson.time, 'YYYY-MM') AS month,
   COUNT(CASE WHEN lesson_type.lesson_type = 'Individual' THEN 1 END) AS individual_lessons,
@@ -11,36 +15,37 @@ JOIN lesson_type ON lesson.lesson_type = lesson_type.id
 GROUP BY TO_CHAR(given_lesson.time, 'YYYY-MM')
 ORDER BY month;
 
--- 2. Show how many students there are with no sibling, with one sibling, with two siblings
-SELECT num_of_siblings, COUNT(*) 
+-- View for Query 2: Students with specific number of siblings
+CREATE OR REPLACE VIEW student_siblings_summary AS
+SELECT num_of_siblings, COUNT(*) AS student_count
 FROM (
-	SELECT student.id, COUNT(student_siblings.id) AS num_of_siblings
-	FROM student
-	LEFT JOIN student_siblings ON student.id = student_siblings.id
-	GROUP BY student.id
-)
+  SELECT student.id, COUNT(student_siblings.id) AS num_of_siblings
+  FROM student
+  LEFT JOIN student_siblings ON student.id = student_siblings.id
+  GROUP BY student.id
+) AS siblings_count
 GROUP BY num_of_siblings
-ORDER BY num_of_siblings
+ORDER BY num_of_siblings;
 
--- 3. List ids and names of all instructors who has given more than a specific number of lessons during the current month
-Select instructor.id ,name, COUNT(*) 
+-- View for Query 3: Instructors with more than a specific number of lessons during the current month
+CREATE OR REPLACE VIEW active_instructors_current_month AS
+SELECT instructor.id, instructor.name, COUNT(*) AS lesson_count
 FROM instructor 
-JOIN available_timeslot 
-	ON instructor.id = available_timeslot.instructor_id
-JOIN lesson 
-	ON lesson.time_slot = available_timeslot.id
-JOIN given_lesson 
-	ON given_lesson.lesson_id = lesson.id
+JOIN available_timeslot ON instructor.id = available_timeslot.instructor_id
+JOIN lesson ON lesson.time_slot = available_timeslot.id
+JOIN given_lesson ON given_lesson.lesson_id = lesson.id
 WHERE DATE_PART('month', available_timeslot.start_time) = DATE_PART('month', CURRENT_DATE)
   AND DATE_PART('year', available_timeslot.start_time) = DATE_PART('year', CURRENT_DATE)
-GROUP BY instructor.id, name HAVING COUNT(*) > 1
-ORDER BY count DESC
+GROUP BY instructor.id, instructor.name
+HAVING COUNT(*) > 1
+ORDER BY lesson_count DESC;
 
--- 4. List all ensembles held during the next week
+-- View for Query 4: Ensembles held during the next week
+CREATE OR REPLACE VIEW next_week_ensembles AS
 SELECT
-TO_CHAR(ats.start_time ,'day') as day_of_week,
-l.target_genre as Genre,
-CASE
+  TO_CHAR(ats.start_time, 'day') AS day_of_week,
+  l.target_genre AS genre,
+  CASE
     WHEN COUNT(b.id) >= l.max_participants THEN 'fully booked'
     WHEN l.max_participants - COUNT(b.id) <= 2 THEN '1-2 seats left'
     ELSE 'more seats left'
@@ -48,8 +53,7 @@ CASE
 FROM lesson l
 JOIN available_timeslot ats ON l.time_slot = ats.id
 LEFT JOIN booking b ON l.id = b.lesson_id
-WHERE l.lesson_type = '3'
-AND ats.start_time BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
-
+WHERE l.lesson_type = '3'  -- Ensemble lessons
+  AND ats.start_time BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '7 days'
 GROUP BY l.target_genre, l.max_participants, ats.start_time
-ORDER BY ats.start_time
+ORDER BY ats.start_time;
